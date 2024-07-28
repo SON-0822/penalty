@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>벌금 모음</title>
+    <link rel="stylesheet" href="money.css">
+</head>
+<body>
+    <div class="container">
+        <h1>벌금 모음</h1>
+        <form id="fine-form">
+            <input type="text" id="name" placeholder="이름" required>
+            <input type="number" id="amount" placeholder="벌금 금액" required>
+            <button type="submit">추가</button>
+        </form>
+        <div class="fine-list">
+            <h2>벌금 내역</h2>
+            <ul id="fine-list">
+                <!-- 벌금 항목이 여기에 추가됩니다. -->
+            </ul>
+            <h2>누적 벌금액</h2>
+            <ul id="total-fines-list">
+                <!-- 누적 벌금액 항목이 여기에 추가됩니다. -->
+            </ul>
+            <p id="total">총 벌금: 0원</p>
+        </div>
+    </div>
+    <script src="money.js"></script>
+</body>
+</html>
