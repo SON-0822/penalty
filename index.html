@@ -4,7 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>벌금 모음</title>
-    <link rel="stylesheet" href="money.css">
+    <link rel="stylesheet" href="styles.css">
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database.js"></script>
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDmPQWX2HHlsAK1n9jMX-A6rPmaysPGJ6M",
+            authDomain: "penalty-71aed.firebaseapp.com",
+            databaseURL: "https://penalty-71aed-default-rtdb.firebaseio.com",
+            projectId: "penalty-71aed",
+            storageBucket: "penalty-71aed.appspot.com",
+            messagingSenderId: "567970323945",
+            appId: "1:567970323945:web:a3735c3137836c3d353f78",
+            measurementId: "G-WC6QDNCH0P"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database(app);
+    </script>
 </head>
 <body>
     <div class="container">
@@ -26,6 +46,6 @@
             <p id="total">총 벌금: 0원</p>
         </div>
     </div>
-    <script src="money.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
