@@ -15,13 +15,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
-
-// 벌금 데이터 초기화 및 로드
-const finesRef = ref(database, 'fines');
-get(finesRef).then(snapshot => {
-    const fines = snapshot.val() || {};
-    updateUI(fines);
-});
+const fines = JSON.parse(localStorage.getItem('fines')) || {};
 
 // 이벤트 리스너 추가
 document.getElementById('fine-form').addEventListener('submit', function(event) {
@@ -37,29 +31,50 @@ document.getElementById('fine-form').addEventListener('submit', function(event) 
     }
 });
 
+// 벌금 추가 함수
 function addFine(name, amount) {
-    const userRef = ref(database, 'fines/' + name);
-    get(userRef).then(snapshot => {
-        const currentAmount = snapshot.val() || 0;
-        set(userRef, currentAmount + amount);
-    });
+    const fineList = document.getElementById('fine-list');
+
+    // 새로운 벌금 항목 추가
+    const li = document.createElement('li');
+    li.innerHTML = `<span>${name}: ${amount}원</span><button onclick="removeFine(this, '${name}', ${amount})">삭제</button>`;
+    fineList.appendChild(li);
+
+    // fines 객체 업데이트
+    if (!fines[name]) {
+        fines[name] = 0;
+    }
+    fines[name] += amount;
+
+    // 로컬 스토리지 업데이트
+    localStorage.setItem('fines', JSON.stringify(fines));
+
+    // 누적 벌금액 및 총 벌금액 업데이트
+    updateTotalFines();
+    updateTotal();
 }
 
-function removeFine(name, amount) {
-    const userRef = ref(database, 'fines/' + name);
-    get(userRef).then(snapshot => {
-        const currentAmount = snapshot.val() || 0;
-        const newAmount = currentAmount - amount;
-        if (newAmount > 0) {
-            set(userRef, newAmount);
-        } else {
-            remove(userRef);
-        }
-    });
+// 벌금 삭제 함수
+function removeFine(button, name, amount) {
+    const li = button.parentElement;
+    li.remove();
+
+    // fines 객체 업데이트
+    fines[name] -= amount;
+    if (fines[name] <= 0) {
+        delete fines[name];
+    }
+
+    // 로컬 스토리지 업데이트
+    localStorage.setItem('fines', JSON.stringify(fines));
+
+    // 누적 벌금액 및 총 벌금액 업데이트
+    updateTotalFines();
+    updateTotal();
 }
 
 // 총 벌금액 업데이트 함수
-function updateTotal(fines) {
+function updateTotal() {
     const totalElement = document.getElementById('total');
     let totalAmount = 0;
 
@@ -70,7 +85,7 @@ function updateTotal(fines) {
 }
 
 // 누적 벌금액 업데이트 함수
-function updateTotalFines(fines) {
+function updateTotalFines() {
     const totalFinesList = document.getElementById('total-fines-list');
     totalFinesList.innerHTML = '';
 
@@ -81,6 +96,21 @@ function updateTotalFines(fines) {
     }
 }
 
+// 페이지 로드 시 저장된 데이터 불러오기
+window.onload = function() {
+    const storedFines = JSON.parse(localStorage.getItem('fines')) || {};
+
+    for (const name in storedFines) {
+        const amount = storedFines[name];
+        const li = document.createElement('li');
+        li.innerHTML = `<span>${name}: ${amount}원</span><button onclick="removeFine(this, '${name}', ${amount})">삭제</button>`;
+        document.getElementById('fine-list').appendChild(li);
+    }
+
+    // 누적 벌금액 및 총 벌금액 업데이트
+    updateTotalFines();
+    updateTotal();
+};
 // UI 업데이트 함수
 function updateUI(fines) {
     const fineList = document.getElementById('fine-list');
