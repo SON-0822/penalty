@@ -35,9 +35,7 @@ function addFine(name, amount) {
     const userRef = ref(database, 'fines/' + name);
     get(userRef).then(snapshot => {
         const currentAmount = snapshot.val() || 0;
-        set(userRef, currentAmount + amount).then(() => {
-            updateUI();
-        });
+        set(userRef, currentAmount + amount);
     });
 }
 
@@ -48,13 +46,9 @@ function removeFine(name, amount) {
         const currentAmount = snapshot.val() || 0;
         const newAmount = currentAmount - amount;
         if (newAmount > 0) {
-            set(userRef, newAmount).then(() => {
-                updateUI();
-            });
+            set(userRef, newAmount);
         } else {
-            remove(userRef).then(() => {
-                updateUI();
-            });
+            remove(userRef);
         }
     });
 }
@@ -83,31 +77,31 @@ function updateTotalFines(fines) {
 }
 
 // UI 업데이트 함수
-function updateUI() {
-    get(finesRef).then(snapshot => {
-        const fines = snapshot.val() || {};
-        const fineList = document.getElementById('fine-list');
-        fineList.innerHTML = '';
+function updateUI(fines) {
+    const fineList = document.getElementById('fine-list');
+    fineList.innerHTML = '';
 
-        for (const name in fines) {
-            const amount = fines[name];
-            const li = document.createElement('li');
-            li.innerHTML = `<span>${name}: ${amount}원</span><button onclick="removeFine('${name}', ${amount})">삭제</button>`;
-            fineList.appendChild(li);
-        }
+    for (const name in fines) {
+        const amount = fines[name];
+        const li = document.createElement('li');
+        li.innerHTML = `<span>${name}: ${amount}원</span><button onclick="removeFine('${name}', ${amount})">삭제</button>`;
+        fineList.appendChild(li);
+    }
 
-        updateTotalFines(fines);
-        updateTotal(fines);
-    });
+    updateTotalFines(fines);
+    updateTotal(fines);
 }
 
 // 실시간 데이터 업데이트 리스너
 onValue(finesRef, snapshot => {
     const fines = snapshot.val() || {};
-    updateUI();
+    updateUI(fines);
 });
 
 // 페이지 로드 시 저장된 데이터 불러오기
 window.onload = function() {
-    updateUI();
+    get(finesRef).then(snapshot => {
+        const fines = snapshot.val() || {};
+        updateUI(fines);
+    });
 };
