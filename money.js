@@ -2,14 +2,14 @@ import { initializeApp } from "firebase/app";
 import { getDatabase, ref, set, get, onValue, update, remove } from "firebase/database";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDmPQWX2HHlsAK1n9jMX-A6rPmaysPGJ6M",
-  authDomain: "penalty-71aed.firebaseapp.com",
-  databaseURL: "https://penalty-71aed-default-rtdb.firebaseio.com",
-  projectId: "penalty-71aed",
-  storageBucket: "penalty-71aed.appspot.com",
-  messagingSenderId: "567970323945",
-  appId: "1:567970323945:web:a3735c3137836c3d353f78",
-  measurementId: "G-WC6QDNCH0P"
+    apiKey: "AIzaSyDmPQWX2HHlsAK1n9jMX-A6rPmaysPGJ6M",
+    authDomain: "penalty-71aed.firebaseapp.com",
+    databaseURL: "https://penalty-71aed-default-rtdb.firebaseio.com",
+    projectId: "penalty-71aed",
+    storageBucket: "penalty-71aed.appspot.com",
+    messagingSenderId: "567970323945",
+    appId: "1:567970323945:web:a3735c3137836c3d353f78",
+    measurementId: "G-WC6QDNCH0P"
 };
 
 const app = initializeApp(firebaseConfig);
