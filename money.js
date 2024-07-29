@@ -1,5 +1,27 @@
-// fines 객체를 로컬 스토리지에서 불러오거나 초기화
-const fines = JSON.parse(localStorage.getItem('fines')) || {};
+// Initialize Firebase
+import { initializeApp } from "firebase/app";
+import { getDatabase, ref, set, get, onValue, update, remove } from "firebase/database";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDmPQWX2HHlsAK1n9jMX-A6rPmaysPGJ6M",
+  authDomain: "penalty-71aed.firebaseapp.com",
+  databaseURL: "https://penalty-71aed-default-rtdb.firebaseio.com",
+  projectId: "penalty-71aed",
+  storageBucket: "penalty-71aed.appspot.com",
+  messagingSenderId: "567970323945",
+  appId: "1:567970323945:web:a3735c3137836c3d353f78",
+  measurementId: "G-WC6QDNCH0P"
+};
+
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
+
+// 벌금 데이터 초기화 및 로드
+const finesRef = ref(database, 'fines');
+get(finesRef).then(snapshot => {
+    const fines = snapshot.val() || {};
+    updateUI(fines);
+});
 
 // 이벤트 리스너 추가
 document.getElementById('fine-form').addEventListener('submit', function(event) {
@@ -15,50 +37,29 @@ document.getElementById('fine-form').addEventListener('submit', function(event) 
     }
 });
 
-// 벌금 추가 함수
 function addFine(name, amount) {
-    const fineList = document.getElementById('fine-list');
-
-    // 새로운 벌금 항목 추가
-    const li = document.createElement('li');
-    li.innerHTML = `<span>${name}: ${amount}원</span><button onclick="removeFine(this, '${name}', ${amount})">삭제</button>`;
-    fineList.appendChild(li);
-
-    // fines 객체 업데이트
-    if (!fines[name]) {
-        fines[name] = 0;
-    }
-    fines[name] += amount;
-
-    // 로컬 스토리지 업데이트
-    localStorage.setItem('fines', JSON.stringify(fines));
-
-    // 누적 벌금액 및 총 벌금액 업데이트
-    updateTotalFines();
-    updateTotal();
+    const userRef = ref(database, 'fines/' + name);
+    get(userRef).then(snapshot => {
+        const currentAmount = snapshot.val() || 0;
+        set(userRef, currentAmount + amount);
+    });
 }
 
-// 벌금 삭제 함수
-function removeFine(button, name, amount) {
-    const li = button.parentElement;
-    li.remove();
-
-    // fines 객체 업데이트
-    fines[name] -= amount;
-    if (fines[name] <= 0) {
-        delete fines[name];
-    }
-
-    // 로컬 스토리지 업데이트
-    localStorage.setItem('fines', JSON.stringify(fines));
-
-    // 누적 벌금액 및 총 벌금액 업데이트
-    updateTotalFines();
-    updateTotal();
+function removeFine(name, amount) {
+    const userRef = ref(database, 'fines/' + name);
+    get(userRef).then(snapshot => {
+        const currentAmount = snapshot.val() || 0;
+        const newAmount = currentAmount - amount;
+        if (newAmount > 0) {
+            set(userRef, newAmount);
+        } else {
+            remove(userRef);
+        }
+    });
 }
 
 // 총 벌금액 업데이트 함수
-function updateTotal() {
+function updateTotal(fines) {
     const totalElement = document.getElementById('total');
     let totalAmount = 0;
 
@@ -69,7 +70,7 @@ function updateTotal() {
 }
 
 // 누적 벌금액 업데이트 함수
-function updateTotalFines() {
+function updateTotalFines(fines) {
     const totalFinesList = document.getElementById('total-fines-list');
     totalFinesList.innerHTML = '';
 
@@ -80,18 +81,24 @@ function updateTotalFines() {
     }
 }
 
-// 페이지 로드 시 저장된 데이터 불러오기
-window.onload = function() {
-    const storedFines = JSON.parse(localStorage.getItem('fines')) || {};
+// UI 업데이트 함수
+function updateUI(fines) {
+    const fineList = document.getElementById('fine-list');
+    fineList.innerHTML = '';
 
-    for (const name in storedFines) {
-        const amount = storedFines[name];
+    for (const name in fines) {
+        const amount = fines[name];
         const li = document.createElement('li');
-        li.innerHTML = `<span>${name}: ${amount}원</span><button onclick="removeFine(this, '${name}', ${amount})">삭제</button>`;
-        document.getElementById('fine-list').appendChild(li);
+        li.innerHTML = `<span>${name}: ${amount}원</span><button onclick="removeFine('${name}', ${amount})">삭제</button>`;
+        fineList.appendChild(li);
     }
 
-    // 누적 벌금액 및 총 벌금액 업데이트
-    updateTotalFines();
-    updateTotal();
-};
+    updateTotalFines(fines);
+    updateTotal(fines);
+}
+
+// 실시간 데이터 업데이트 리스너
+onValue(finesRef, snapshot => {
+    const fines = snapshot.val() || {};
+    updateUI(fines);
+});
